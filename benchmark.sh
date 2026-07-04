@@ -57,7 +57,7 @@ sleep 2
 
 # 5. Execute Concurrent Load Test (60 Seconds)
 echo "🔥 Initiating 60-second concurrent load test..."
-echo "📈 Target: 100K+ Requests Per Second (50k Buys + 50k Sells)"
+echo "📈 Target: 100K Requests Per Second (50k Buys + 50k Sells)"
 
 hey -m POST -D dummy-data/buy.json -T "application/json" -c 100 -q 500 -z 60s http://localhost:8080/api/v1/orders > /dev/null &
 PID_BUY=$!
