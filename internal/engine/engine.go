@@ -2,6 +2,8 @@ package engine
 
 import (
 	"sync"
+
+	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/metrics"
 )
 
 // Engine routes incoming requests to the correct symbol's processing goroutine.
@@ -11,6 +13,7 @@ type Engine struct {
 	mu             sync.RWMutex
 	routers        map[string]chan interface{}
 	GlobalOrderMap sync.Map // Maps orderID (string) to symbol (string)
+	Metrics        *metrics.GlobalMetrics
 }
 
 func NewEngine() *Engine {
@@ -45,7 +48,7 @@ func (e *Engine) getOrSpawnRouter(symbol string) chan interface{} {
 
 	// Spawn the dedicated worker goroutine for this symbol
 	ob := NewOrderBook(symbol)
-	go processSymbol(ob, ch)
+	go processSymbol(ob, ch, e.Metrics)
 
 	return ch
 }
