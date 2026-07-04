@@ -1,4 +1,3 @@
-```markdown
 # High-Performance Order Matching Engine
 
 A low-latency, highly concurrent order matching engine written in Go. This system implements strict Price-Time (FIFO) priority matching for limit and market orders, capable of sustaining massive throughput with sub-millisecond tail latencies.
@@ -9,9 +8,8 @@ A low-latency, highly concurrent order matching engine written in Go. This syste
 * Go 1.22 or higher
 
 ### Build and Run
-You can start the server using the provided Makefile:
 ```bash
-make run
+go run cmd/api/main.go
 
 ```
 
@@ -22,14 +20,14 @@ The server will start on port `8080`.
 Run the core matching logic and correctness tests:
 
 ```bash
-make test
+go test ./internal/engine
 
 ```
 
 To run tests with Go's race detector enabled (verifying thread safety):
 
 ```bash
-make race
+go test -v -race ./internal/engine
 
 ```
 
@@ -69,16 +67,14 @@ Performance was evaluated using `hey` on my Macbook Air M5, running a 60-second 
 
 ---
 
-## 🛠️ Assumptions & Limitations
+## Assumptions & Limitations
 
 * **Self-Trading:** As Per the assignment specifications, self-trading is permitted. The engine does not currently prevent a user's buy order from matching against their own sell order.
 * **In-Memory State:** For maximum throughput, the entire order book state is kept in memory. If the server crashes, active orders are lost.
 * **Lazy Deletion:** Cancelled orders are flagged as cancelled in $O(1)$ time and skipped during the matching loop, rather than executing an $O(N)$ slice shift to remove them immediately.
 
-## 🚀 Future Improvements (With more time)
+## 🚀 Future Improvements
 
 1. **Garbage Collection Optimization (`sync.Pool`):** Currently, the system allocates new `Order` and `Trade` structs for every request. Implementing a `sync.Pool` to reuse these structs would drastically reduce Garbage Collector (GC) pressure, which is the primary cause of any microsecond spikes at the p999 level.
 2. **WebSocket Streaming:** Implement real-time order book snapshots and trade tick feeds for clients using WebSockets.
 3. **JSON Serialization:** Swap the standard `encoding/json` library for a high-performance alternative like `go-json` to reduce CPU cycles spent on API layer deserialization.
-
-```
