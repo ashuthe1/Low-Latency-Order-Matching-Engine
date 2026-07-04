@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
+	"container/list"
+
 	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/types"
 )
 
@@ -26,6 +28,8 @@ type Order struct {
 	Status types.OrderStatus `json:"status"`
 
 	Timestamp int64 `json:"timestamp"`
+
+	QueueElement *list.Element `json:"-"`
 }
 
 func NewOrder(
