@@ -8,8 +8,9 @@ import (
 type Engine struct {
 	// We only need a mutex to protect the map when adding a brand-new symbol.
 	// Once the symbol exists, sending to its channel is lock-free.
-	mu      sync.RWMutex
-	routers map[string]chan interface{}
+	mu             sync.RWMutex
+	routers        map[string]chan interface{}
+	GlobalOrderMap sync.Map // Maps orderID (string) to symbol (string)
 }
 
 func NewEngine() *Engine {
@@ -24,7 +25,7 @@ func (e *Engine) getOrSpawnRouter(symbol string) chan interface{} {
 	e.mu.RLock()
 	ch, exists := e.routers[symbol]
 	e.mu.RUnlock()
-	
+
 	if exists {
 		return ch
 	}
@@ -41,7 +42,7 @@ func (e *Engine) getOrSpawnRouter(symbol string) chan interface{} {
 	// Buffer of 10,000 to absorb massive traffic spikes without blocking the API layer
 	ch = make(chan interface{}, 10000)
 	e.routers[symbol] = ch
-	
+
 	// Spawn the dedicated worker goroutine for this symbol
 	ob := NewOrderBook(symbol)
 	go processSymbol(ob, ch)
