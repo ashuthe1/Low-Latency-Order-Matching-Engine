@@ -26,6 +26,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/orders", apiServer.LatencyMiddleware(apiServer.HandleSubmitOrder))
 	mux.HandleFunc("DELETE /api/v1/orders/{order_id}", apiServer.LatencyMiddleware(apiServer.HandleCancelOrder))
 	mux.HandleFunc("GET /api/v1/orderbook/{symbol}", apiServer.LatencyMiddleware(apiServer.HandleGetOrderBook))
+	mux.HandleFunc("GET /api/v1/orders/{order_id}", apiServer.LatencyMiddleware(apiServer.HandleGetOrderStatus))
 
 	// Register Health & Metrics
 	mux.HandleFunc("GET /health", apiServer.HandleHealth)

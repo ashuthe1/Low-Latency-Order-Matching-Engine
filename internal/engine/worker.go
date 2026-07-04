@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"errors"
+
 	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/metrics"
 )
 
@@ -28,9 +30,16 @@ func processSymbol(ob *OrderBook, ch <-chan interface{}, m *metrics.GlobalMetric
 			req.ResponseChan <- err
 
 		case SnapshotRequest:
-			// We must generate the snapshot inside this thread to avoid race conditions
-			// when reading the Red-Black Trees.
 			req.ResponseChan <- generateSnapshot(ob, req.Depth)
+			
+		case StatusRequest:
+			order, exists := ob.ActiveOrders[req.OrderID]
+			if !exists {
+				req.ResponseChan <- StatusResponse{Error: errors.New("order not found")}
+			} else {
+				orderCopy := *order
+				req.ResponseChan <- StatusResponse{Order: &orderCopy, Error: nil}
+			}
 		}
 	}
 }

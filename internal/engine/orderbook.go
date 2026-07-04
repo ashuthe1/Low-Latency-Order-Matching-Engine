@@ -54,7 +54,7 @@ func NewOrderBook(symbol string) *OrderBook {
 	}
 }
 
-// AddOrder places a LIMIT order into the book. 
+// AddOrder places a LIMIT order into the book.
 // Note: MARKET orders do not rest in the book, so they bypass this.
 func (ob *OrderBook) AddOrder(order *models.Order) {
 	ob.ActiveOrders[order.ID] = order
@@ -93,7 +93,7 @@ func (ob *OrderBook) CancelOrder(orderID string) error {
 
 	// Mark as cancelled. The matching engine will skip it when evaluating queues.
 	order.Status = models.Cancelled
-	delete(ob.ActiveOrders, orderID)
+	// delete(ob.ActiveOrders, orderID)
 
 	// We still need to decrement the volume from the price level (O(log N) operation)
 	var tree *redblacktree.Tree

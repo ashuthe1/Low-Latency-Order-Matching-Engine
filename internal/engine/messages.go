@@ -36,3 +36,13 @@ type SnapshotRequest struct {
 	Depth        int
 	ResponseChan chan<- OrderBookSnapshot
 }
+
+type StatusResponse struct {
+	Order *models.Order
+	Error error
+}
+
+type StatusRequest struct {
+	OrderID      string
+	ResponseChan chan<- StatusResponse
+}

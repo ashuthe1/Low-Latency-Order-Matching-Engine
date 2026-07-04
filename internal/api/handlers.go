@@ -198,6 +198,33 @@ func (a *API) HandleGetMetrics(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// GET /api/v1/orders/{order_id}
+func (a *API) HandleGetOrderStatus(w http.ResponseWriter, r *http.Request) {
+	orderID := r.PathValue("order_id")
+
+	// Look up the routing symbol
+	symbolInter, exists := a.OrderToSymbol.Load(orderID)
+	if !exists {
+		respondError(w, http.StatusNotFound, "Order not found")
+		return
+	}
+	symbol := symbolInter.(string)
+
+	respChan := make(chan engine.StatusResponse, 1)
+	a.Engine.GetOrderStatus(symbol, engine.StatusRequest{
+		OrderID:      orderID,
+		ResponseChan: respChan,
+	})
+
+	result := <-respChan
+	if result.Error != nil {
+		respondError(w, http.StatusNotFound, result.Error.Error())
+		return
+	}
+
+	respondJSON(w, http.StatusOK, result.Order)
+}
+
 // LatencyMiddleware wraps HTTP handlers to track how long they take
 func (a *API) LatencyMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

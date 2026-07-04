@@ -67,3 +67,9 @@ func (e *Engine) GetOrderBook(symbol string, req SnapshotRequest) {
 	ch := e.getOrSpawnRouter(symbol)
 	ch <- req
 }
+
+// GetOrderStatus asks the worker thread for the current state of an order
+func (e *Engine) GetOrderStatus(symbol string, req StatusRequest) {
+	ch := e.getOrSpawnRouter(symbol)
+	ch <- req
+}
