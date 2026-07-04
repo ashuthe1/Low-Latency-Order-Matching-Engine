@@ -6,19 +6,16 @@ import (
 	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/metrics"
 )
 
-// Engine routes incoming requests to the correct symbol's processing goroutine.
 type Engine struct {
-	// We only need a mutex to protect the map when adding a brand-new symbol.
-	// Once the symbol exists, sending to its channel is lock-free.
-	mu             sync.RWMutex
-	routers        map[string]chan interface{}
-	GlobalOrderMap sync.Map // Maps orderID (string) to symbol (string)
-	Metrics        *metrics.GlobalMetrics
+	mu      sync.RWMutex
+	routers map[string]chan interface{}
+	Metrics *metrics.GlobalMetrics // Add this!
 }
 
-func NewEngine() *Engine {
+func NewEngine(m *metrics.GlobalMetrics) *Engine {
 	return &Engine{
 		routers: make(map[string]chan interface{}),
+		Metrics: m,
 	}
 }
 
