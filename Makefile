@@ -1,4 +1,4 @@
-.PHONY: build run test race benchmark profile
+.PHONY: build run test race benchmark profile view-profile
 
 build:
 	mkdir -p build
@@ -21,3 +21,6 @@ profile:
 	@echo "🎯 Running 20-second CPU profiling window..."
 	go test -bench=. -cpuprofile=build/cpu.prof ./internal/engine/...
 	@echo "✅ Profile saved to build/cpu.prof. To view, run: go tool pprof build/cpu.prof"
+
+view-profile:
+	go tool pprof build/cpu.prof
