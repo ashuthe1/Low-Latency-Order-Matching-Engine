@@ -7,4 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 )
 
-require github.com/emirpasic/gods v1.18.1 // indirect
+require (
+	github.com/HdrHistogram/hdrhistogram-go v1.2.0 // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
+)

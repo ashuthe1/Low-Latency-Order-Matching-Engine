@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/engine"
+	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/metrics"
 	"github.com/ashuthe1/Low-Latency-Order-Matching-Engine/internal/models"
 	"github.com/google/uuid"
 )
@@ -15,6 +16,7 @@ import (
 type API struct {
 	Engine        *engine.Engine
 	OrderToSymbol *sync.Map // Maps OrderID -> Symbol for fast routing
+	Metrics       *metrics.GlobalMetrics
 }
 
 func NewAPI(eng *engine.Engine) *API {
@@ -159,4 +161,57 @@ func (a *API) HandleGetOrderBook(w http.ResponseWriter, r *http.Request) {
 		"bids":      snapshot.Bids,
 		"asks":      snapshot.Asks,
 	})
+}
+
+// GET /health
+func (a *API) HandleHealth(w http.ResponseWriter, r *http.Request) {
+	uptime := time.Since(a.Metrics.StartTime).Seconds()
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"status":           "healthy",
+		"uptime_seconds":   int64(uptime),
+		"orders_processed": a.Metrics.OrdersReceived.Load(),
+	})
+}
+
+// GET /metrics
+func (a *API) HandleGetMetrics(w http.ResponseWriter, r *http.Request) {
+	p50, p99, p999 := a.Metrics.LatencySnapshot()
+
+	uptimeSecs := time.Since(a.Metrics.StartTime).Seconds()
+	ordersRecv := a.Metrics.OrdersReceived.Load()
+
+	tps := float64(0)
+	if uptimeSecs > 0 {
+		tps = float64(ordersRecv) / uptimeSecs
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"orders_received":           ordersRecv,
+		"orders_matched":            a.Metrics.OrdersMatched.Load(),
+		"orders_cancelled":          a.Metrics.OrdersCancelled.Load(),
+		"trades_executed":           a.Metrics.TradesExecuted.Load(),
+		"latency_p50_ms":            p50,
+		"latency_p99_ms":            p99,
+		"latency_p999_ms":           p999,
+		"throughput_orders_per_sec": int64(tps),
+	})
+}
+
+// LatencyMiddleware wraps HTTP handlers to track how long they take
+func (a *API) LatencyMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// If it's a new order, increment the received counter
+		if r.Method == http.MethodPost && r.URL.Path == "/api/v1/orders" {
+			a.Metrics.OrdersReceived.Add(1)
+		} else if r.Method == http.MethodDelete {
+			a.Metrics.OrdersCancelled.Add(1)
+		}
+
+		next(w, r)
+
+		a.Metrics.RecordLatency(time.Since(start))
+	}
 }
