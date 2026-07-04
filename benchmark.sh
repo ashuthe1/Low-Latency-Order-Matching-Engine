@@ -45,6 +45,7 @@ lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 
 # 4. Start the Engine in the background
 echo "⚡ Compiling and Starting the Matching Engine binary..."
+mkdir -p build
 go build -o build/engine cmd/api/main.go
 ./build/engine > /dev/null 2>&1 &
 SERVER_PID=$!
@@ -84,7 +85,7 @@ echo "🛑 Shutting down the Matching Engine..."
 # Explicit teardown: Kill the specific background PID
 kill -9 $SERVER_PID 2>/dev/null || true
 
-# kill the process listening on port 8080
+# Failsafe: kill the process listening on port 8080
 lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 
 echo "✅ Server stopped. Port 8080 is clear."

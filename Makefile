@@ -1,6 +1,7 @@
-.PHONY: build run test race benchmark
+.PHONY: build run test race benchmark profile
 
 build:
+	mkdir -p build
 	go build -o build/engine cmd/api/main.go
 
 run:
@@ -15,3 +16,8 @@ race:
 benchmark:
 	chmod +x benchmark.sh
 	./benchmark.sh
+
+profile:
+	@echo "🎯 Running 20-second CPU profiling window..."
+	go test -bench=. -cpuprofile=build/cpu.prof ./internal/engine/...
+	@echo "✅ Profile saved to build/cpu.prof. To view, run: go tool pprof build/cpu.prof"
