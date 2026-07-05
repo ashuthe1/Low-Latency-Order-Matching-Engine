@@ -130,6 +130,6 @@ For easy manual testing and API exploration, a complete Postman collection is in
 
 ## 🚀 Future Improvements
 
-1. **Allocation pooling via `sync.Pool`:** Reusing volatile transient components like `Order` and `Trade` structs reduces Go Garbage Collector memory scans, flatlining the microsecond p999 latency tail during continuous workload spikes.
-2. **WebSocket Snapshot Streaming:** Exposing subscription structures via real-time WebSocket listeners can deliver instant match ticks and depth adjustments down to high-frequency consumers.
-3. **High-Velocity Serialization:** Migrating away from default standard `encoding/json` standard frameworks to structured codegen toolchains like `go-json` saves vital CPU cycles directly at the HTTP ingress gateway layer.
+1. WAL: Implement Write-Ahead-Log flow, so that if system crashes the orderbook or any data related to them don't get lost.
+2. **Allocation pooling via `sync.Pool`:** Reusing volatile transient components like `Order` and `Trade` structs reduces Go Garbage Collector memory scans, flatlining the microsecond p999 latency tail during continuous workload spikes.
+3. **Server Sent Event(SSE) Snapshot Streaming:** Exposing subscription structures via real-time SSE listeners can deliver instant match ticks and depth adjustments down to high-frequency consumers.
