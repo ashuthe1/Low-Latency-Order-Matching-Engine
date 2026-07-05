@@ -117,6 +117,11 @@ Instead, this system leans natively on the **Actor Model** utilizing Go primitiv
 
 ---
 
+### 🧰 Postman Collection
+For easy manual testing and API exploration, a complete Postman collection is included with this repository. Simply navigate to the `postman/` directory and import the exported JSON file into your Postman workspace to instantly interact with all available endpoints.
+
+---
+
 ## ⚠️ Assumptions & Limitations
 
 * **Self-Match Permissibility:** In absolute alignment with evaluation bounds, cross-client account prevention checks are bypassed; orders matching matching accounts execute fields identically.
